@@ -1,6 +1,8 @@
 import csv
 import difflib
 
+from line import Line
+
 SCRIPT_FILE = "script.csv"
 SRT_FILE = "srt-English.csv"
 
@@ -29,54 +31,41 @@ def slice_to_4(to_slice):
 def get_closest_match(text, srt_arr):
     matches = difflib.get_close_matches(text, srt_arr, n=1)
     if matches:
-        return matches[0]
+        return matches
+    bunches = []
     parts = slice_to_4(text)
-    broken = ""
     for part in parts:
         matches = difflib.get_close_matches(part, srt_arr, n=1)
         if matches:
-            return matches[0]
-
+            bunches.append(matches[0])
+    return bunches
 
 def main():
     with open(SCRIPT_FILE, newline='') as f:
         # handler for script (csv)
         script_reader = csv.reader(f)
-    
-
+        results = []
+        
         # handler for srt (list)
         dict_srt = get_srt()
-
+        index = 0
         for line in script_reader:
-            found_match = get_closest_match(line[2], dict_srt.keys())
-            print(str(dict_srt[found_match]) + "   " + found_match + "  " + line[1]  )
+            if index%10 == 0:
+                print (f"{index/1303*100}%", end="\r")
+            found_matches = get_closest_match(line[2], dict_srt.keys())
+            for match in found_matches:
+                results.append(Line(dict_srt[match][0], dict_srt[match][1].strip(), match, line[1]))
+            index += 1 
 
+    print("Finished processing. Now sorting")
+    results.sort(reverse=True)
+    results.reverse()
+    with open("merge.csv", "w", newline='') as merge_csv:
+        csvwriter = csv.writer(merge_csv)
+        csvwriter.writerow(["Begin", "dissapear", "Content", "speaker"])
+        for res in results:
+            csvwriter.writerow(res.to_csv())
 
-
-
-
-def ddmain():
-    with open("srt-script.csv", "w", newline='') as srt_csv:
-        csvwriter = csv.writer(srt_csv)
-        csvwriter.writerow(["Begin", "Disapear", "Text", "Speaker"])
-        script_reader, srt_reader  = get_lines()
-        # in_interval = False
-        # text = ""
-
-        for line in lines:
-            if not line.isnumeric(): # skip on the index number
-                if '-->' in line:
-                    begin = line.split(' --> ')[0] # parse the begin time
-                    end = line.split(' --> ')[1] # parse the end time
-                    in_interval = True  # now the following lines till \n\n are the content
-                
-                elif in_interval:
-                    if line == "\n":
-                        in_interval = False
-                        csvwriter.writerow([begin, end, text.strip()])
-                        text = ""
-                    else:
-                        text += line.strip() + " "
 
 
 if __name__ == "__main__":
