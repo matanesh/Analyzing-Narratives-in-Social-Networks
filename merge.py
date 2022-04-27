@@ -3,7 +3,7 @@ import difflib
 
 from line import Line
 
-SCRIPT_FILE = "script.csv"
+SCRIPT_FILE = "AB.csv"
 SRT_FILE = "srt-English.csv"
 
 
