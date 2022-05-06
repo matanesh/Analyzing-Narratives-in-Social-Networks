@@ -6,11 +6,11 @@ def get_lines():
         return f.readlines()
 
 def isSpeaker(line):
-    return line.isupper() and line.startswith(" "*16) and "CUT " not in line and "DISSOLVE" not in line
+    return line.isupper() and line.startswith(" "*16) and "CUT TO" not in line and "DISSOLVE" not in line
 
 def main():
     people = set()
-    with open("AB.csv", "w", newline='') as script_csv:
+    with open("script.csv", "w", newline='') as script_csv:
         csvwriter = csv.writer(script_csv)
         csvwriter.writerow(["Response number", "Speaker", "Content"])
         index = 1
